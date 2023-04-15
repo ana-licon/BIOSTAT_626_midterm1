@@ -58,6 +58,7 @@ step 6: Run SVM models for multiclass classification
         notes: I ran 2 svm models. The first model only uses 13 of the 561 features, while the second model uses all 561 features.The second model gives a slightly better classification (98.2% accuracy), than the first model (92.8%). However, there is a big issue of overfitting with the second classification model because there is known multicollinearity in the data set. In the data description we are told that all features are calculated from the time and frequency domain data of the sensors
         
 step 7: Make predictions with classifiers on subsetted training data to verify accuracy of classification
+
 step 8: make prediction on test data using model 2 (svm.fit2)
 
 step 9: write out binary classification predictions to a text file named ```multiclass_1425.txt```
