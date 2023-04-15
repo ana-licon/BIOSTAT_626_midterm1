@@ -1,0 +1,64 @@
+---
+title: "BIOSTAT 626 Midterm 1 Multiclass classifier - 1425"
+author: "Ana Laura Licon"
+date: "`r Sys.Date()`"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "C:\\Users\\anala\\Desktop\\BIOSTAT 626")
+getwd()
+```
+
+```{r}
+library(dplyr)
+library(caret)
+library(e1071)
+
+# step 1: Set working directory (knitr::opts_knit$set(root.dir = "") where testing and training files are saved.
+
+# step 2: Load training and test data files
+training.data <- read.table("training_data.txt", header=T)
+testing.data <- read.table("test_data.txt", header=T)
+
+# step 3: fix the data labeling for the activities labeled >= 7
+
+training.data$activity[training.data$activity >= 7] = 7
+
+# step 4: Remove subject variables form the data sets
+training.data <- select(training.data, -subject)
+testing.data <- select(testing.data, -subject)
+
+# step 5: Set seed to 626 and create data partition for training and testing the multiclass classifier
+set.seed(626)
+indxtrain <- createDataPartition(y = training.data$activity, p= 0.8, list = FALSE) 
+training <- training.data[indxtrain,]
+testing <- training.data[-indxtrain,]
+
+# step 6: Run SVM models for multiclass classification 
+
+## notes: I ran 2 svm models. The first model only uses 13 of the 561 features, while the second model uses all 561 features.The second model gives a slightly better classification (98.2% accuracy), than the first model (92.8%). However, there is a big issue of over-fitting with the second classification model because there is known multicollinearity in the data set. In the data description we are told that all features are calculated from the time and frequency domain data of the sensors.
+
+svm.fit <- svm(activity~F1+F2+F3+F201+F513+F121+F122+F123+F240+F539+F559+F560+F561, data=training, type = "C-classification", kernel = "radial", cost=10)
+
+svm.fit2 <- svm(activity~., data=training, type = "C-classification", kernel = "radial", cost=10)
+
+# step 7: Make predictions with classifiers on subsetted training data to verify accuracy of classification
+
+# prediction from the first model, svm.fit.
+pred.svm <- predict(svm.fit, testing)
+confusionMatrix(table(testing$activity, pred.svm))
+
+# prediction from the second model, svm.fit2
+pred.svm2 <- predict(svm.fit2, testing)
+confusionMatrix(table(testing$activity, pred.svm2))
+
+#step 8: make prediction on test data using model 2 (svm.fit2)
+multiclass.preds <- predict(svm.fit2, testing.data)
+
+#step 9: write out binary classification predictions to a text file named
+write.table(multiclass.preds, "multiclass_1425.txt", row.names=FALSE, col.names=FALSE, quote = F)
+
+```
+
